@@ -3,14 +3,27 @@ from pydub import AudioSegment
 import os
 import shutil
 
+RUNTIME_MARKER = "yt-dlp-ejs-node-v2"
+
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 def download_youtube_audio(url :str) ->str:
     output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
+    node_path = shutil.which("node") or shutil.which("nodejs")
+    if not node_path and os.path.isfile("/usr/bin/node"):
+        node_path = "/usr/bin/node"
+    if not node_path:
+        raise RuntimeError(
+            "Node.js is required for YouTube downloads. "
+            "Add nodejs to packages.txt and redeploy the app."
+        )
+
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": output_path,
+        "js_runtimes": {"node": {"path": node_path}},
+        "remote_components": ["ejs:github"],
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -20,18 +33,8 @@ def download_youtube_audio(url :str) ->str:
         ],
         "quiet": True,
     }
-    node_path = shutil.which("node") or shutil.which("nodejs")
-    if not node_path and os.path.isfile("/usr/bin/node"):
-        node_path = "/usr/bin/node"
-    if not node_path:
-        raise RuntimeError(
-            "Node.js is required for YouTube downloads. "
-            "Add nodejs to packages.txt and redeploy the app."
-        )
     node_version = os.popen(f'"{node_path}" --version').read().strip()
     print(f"yt-dlp JavaScript runtime: {node_path} ({node_version})")
-    ydl_opts["js_runtimes"] = {"node": {"path": node_path}}
-    ydl_opts["remote_components"] = ["ejs:github"]
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)

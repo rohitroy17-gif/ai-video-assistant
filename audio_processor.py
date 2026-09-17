@@ -14,7 +14,15 @@ def download_youtube_audio(url: str) -> str:
 
     ydl_opts = {
         "format": "bestaudio/best",
+
         "outtmpl": output_path,
+
+        "noplaylist": True,
+
+        # Use Deno for YouTube JavaScript challenges
+        "js_runtimes": {
+            "deno": {}
+        },
 
         "postprocessors": [
             {
@@ -26,13 +34,17 @@ def download_youtube_audio(url: str) -> str:
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
+
+        info = ydl.extract_info(
+            url,
+            download=True
+        )
 
         filename = ydl.prepare_filename(info)
+
         filename = os.path.splitext(filename)[0] + ".wav"
 
         return filename
-
 
 def convert_audio_to_wav(input_path:str)-> str:
     """convert any audio/video file to WAV format using pydub"""

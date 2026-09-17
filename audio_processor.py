@@ -21,10 +21,13 @@ def download_youtube_audio(url :str) ->str:
         )
 
     ydl_opts = {
-        "format": "bestaudio/best",
+        "format": "bestaudio[ext=m4a]/bestaudio/best",
         "outtmpl": output_path,
         "js_runtimes": {"node": {"path": node_path}},
         "remote_components": ["ejs:github"],
+        "noplaylist": True,
+        "retries": 3,
+        "fragment_retries": 3,
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",

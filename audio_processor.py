@@ -33,7 +33,7 @@ def _youtube_cookie_file() -> str | None:
     return temporary_file.name
 
 def download_youtube_audio(url :str) ->str:
-    output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
+    output_path = os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s")
     node_path = shutil.which("node") or shutil.which("nodejs")
     if not node_path and os.path.isfile("/usr/bin/node"):
         node_path = "/usr/bin/node"
@@ -44,7 +44,7 @@ def download_youtube_audio(url :str) ->str:
         )
 
     ydl_opts = {
-        "format": "bestaudio[ext=m4a]/bestaudio/best",
+        "format": "bestaudio/best/worst",
         "outtmpl": output_path,
         "http_headers": {
             "User-Agent": (
@@ -78,7 +78,7 @@ def download_youtube_audio(url :str) ->str:
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info).replace(".webm", ".wav").replace(".m4a", ".wav")
+            filename = os.path.splitext(ydl.prepare_filename(info))[0] + ".wav"
     finally:
         if cookie_file and not os.getenv("YOUTUBE_COOKIES_FILE"):
             try:

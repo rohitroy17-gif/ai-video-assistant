@@ -56,6 +56,11 @@ def download_youtube_audio(url :str) ->str:
         },
         "js_runtimes": {"node": {"path": node_path}},
         "remote_components": ["ejs:github"],
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["web_embedded"],
+            },
+        },
         "noplaylist": True,
         "retries": 3,
         "fragment_retries": 3,

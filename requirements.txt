@@ -1,5 +1,6 @@
 # ── Audio / Video ─────────────────────────────────────────────────────────────
-yt-dlp[default]
+yt-dlp[default]>=2026.9.1
+bgutil-ytdlp-pot-provider
 pydub>=0.25.1
 ffmpeg-python
 audioop-lts

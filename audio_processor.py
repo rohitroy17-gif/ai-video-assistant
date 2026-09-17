@@ -81,9 +81,18 @@ def download_youtube_audio(url :str) ->str:
     print(f"yt-dlp JavaScript runtime: {node_path} ({node_version})", file=sys.stderr, flush=True)
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = os.path.splitext(ydl.prepare_filename(info))[0] + ".wav"
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                filename = os.path.splitext(ydl.prepare_filename(info))[0] + ".wav"
+        except yt_dlp.utils.DownloadError as error:
+            if not cookie_file or "Requested format is not available" not in str(error):
+                raise
+            print("YouTube cookies returned no usable format; retrying without cookies.")
+            ydl_opts.pop("cookiefile", None)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                filename = os.path.splitext(ydl.prepare_filename(info))[0] + ".wav"
     finally:
         if cookie_file and not os.getenv("YOUTUBE_COOKIES_FILE"):
             try:

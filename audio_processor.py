@@ -1,6 +1,7 @@
 import yt_dlp
 from pydub import AudioSegment
 import os
+import shutil
 
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
@@ -10,7 +11,6 @@ def download_youtube_audio(url :str) ->str:
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": output_path,
-        "js_runtimes": {"node": {}},
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -20,6 +20,10 @@ def download_youtube_audio(url :str) ->str:
         ],
         "quiet": True,
     }
+    node_path = shutil.which("node") or shutil.which("nodejs")
+    if node_path:
+        ydl_opts["js_runtimes"] = {"node": {"path": node_path}}
+
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         filename = ydl.prepare_filename(info).replace(".webm", ".wav").replace(".m4a", ".wav")

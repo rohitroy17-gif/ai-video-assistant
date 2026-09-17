@@ -21,12 +21,16 @@ def download_youtube_audio(url :str) ->str:
         "quiet": True,
     }
     node_path = shutil.which("node") or shutil.which("nodejs")
+    if not node_path and os.path.isfile("/usr/bin/node"):
+        node_path = "/usr/bin/node"
     if not node_path:
         raise RuntimeError(
             "Node.js is required for YouTube downloads. "
             "Add nodejs to packages.txt and redeploy the app."
         )
+    print(f"yt-dlp JavaScript runtime: {node_path}")
     ydl_opts["js_runtimes"] = {"node": {"path": node_path}}
+    ydl_opts["remote_components"] = ["ejs:github"]
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)

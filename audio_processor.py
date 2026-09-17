@@ -3,11 +3,34 @@ from pydub import AudioSegment
 import os
 import shutil
 import sys
+import tempfile
 
 RUNTIME_MARKER = "yt-dlp-ejs-node-v2"
 
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
+def _youtube_cookie_file() -> str | None:
+    cookie_file = os.getenv("YOUTUBE_COOKIES_FILE")
+    cookie_text = os.getenv("YOUTUBE_COOKIES")
+    if not cookie_text:
+        try:
+            import streamlit as st
+            cookie_text = st.secrets.get("YOUTUBE_COOKIES")
+        except Exception:
+            cookie_text = None
+
+    if cookie_file:
+        return cookie_file
+    if not cookie_text:
+        return None
+
+    temporary_file = tempfile.NamedTemporaryFile(
+        mode="w", suffix=".txt", encoding="utf-8", delete=False
+    )
+    temporary_file.write(cookie_text)
+    temporary_file.close()
+    return temporary_file.name
 
 def download_youtube_audio(url :str) ->str:
     output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
@@ -23,6 +46,14 @@ def download_youtube_audio(url :str) ->str:
     ydl_opts = {
         "format": "bestaudio[ext=m4a]/bestaudio/best",
         "outtmpl": output_path,
+        "http_headers": {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/131.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language": "en-US,en;q=0.9",
+        },
         "js_runtimes": {"node": {"path": node_path}},
         "remote_components": ["ejs:github"],
         "noplaylist": True,
@@ -37,13 +68,23 @@ def download_youtube_audio(url :str) ->str:
         ],
         "quiet": True,
     }
+    cookie_file = _youtube_cookie_file()
+    if cookie_file:
+        ydl_opts["cookiefile"] = cookie_file
     node_version = os.popen(f'"{node_path}" --version').read().strip()
     print(f"yt-dlp JavaScript runtime: {node_path} ({node_version})", flush=True)
     print(f"yt-dlp JavaScript runtime: {node_path} ({node_version})", file=sys.stderr, flush=True)
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        filename = ydl.prepare_filename(info).replace(".webm", ".wav").replace(".m4a", ".wav")
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info).replace(".webm", ".wav").replace(".m4a", ".wav")
+    finally:
+        if cookie_file and not os.getenv("YOUTUBE_COOKIES_FILE"):
+            try:
+                os.unlink(cookie_file)
+            except OSError:
+                pass
     return filename
 
 

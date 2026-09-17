@@ -28,7 +28,8 @@ def download_youtube_audio(url :str) ->str:
             "Node.js is required for YouTube downloads. "
             "Add nodejs to packages.txt and redeploy the app."
         )
-    print(f"yt-dlp JavaScript runtime: {node_path}")
+    node_version = os.popen(f'"{node_path}" --version').read().strip()
+    print(f"yt-dlp JavaScript runtime: {node_path} ({node_version})")
     ydl_opts["js_runtimes"] = {"node": {"path": node_path}}
     ydl_opts["remote_components"] = ["ejs:github"]
 

@@ -32,3 +32,9 @@ python-dotenv
 numpy
 tqdm
 requests
+
+
+# ── YouTube / Audio ───────────────────────────────────────────────────────────
+yt-dlp
+pydub
+ffmpeg-python

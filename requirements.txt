@@ -1,12 +1,14 @@
 # ── Audio / Video ─────────────────────────────────────────────────────────────
 yt-dlp>=2024.4.9
 pydub>=0.25.1
+ffmpeg-python
 audioop-lts
 
 # ── Speech-to-Text ────────────────────────────────────────────────────────────
 openai-whisper>=20231117
 torch>=2.2.0
 torchaudio>=2.2.0
+torchvision
 
 # ── LangChain ─────────────────────────────────────────────────────────────────
 langchain
@@ -32,9 +34,3 @@ python-dotenv
 numpy
 tqdm
 requests
-
-
-# ── YouTube / Audio ───────────────────────────────────────────────────────────
-yt-dlp
-pydub
-ffmpeg-python

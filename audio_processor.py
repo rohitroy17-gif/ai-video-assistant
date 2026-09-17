@@ -44,7 +44,7 @@ def download_youtube_audio(url :str) ->str:
         )
 
     ydl_opts = {
-        "format": "bestaudio/best",
+        "format": "best",
         "outtmpl": output_path,
         "http_headers": {
             "User-Agent": (

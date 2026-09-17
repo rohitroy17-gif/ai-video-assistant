@@ -2,6 +2,7 @@ import yt_dlp
 from pydub import AudioSegment
 import os
 import shutil
+import sys
 
 RUNTIME_MARKER = "yt-dlp-ejs-node-v2"
 
@@ -34,7 +35,8 @@ def download_youtube_audio(url :str) ->str:
         "quiet": True,
     }
     node_version = os.popen(f'"{node_path}" --version').read().strip()
-    print(f"yt-dlp JavaScript runtime: {node_path} ({node_version})")
+    print(f"yt-dlp JavaScript runtime: {node_path} ({node_version})", flush=True)
+    print(f"yt-dlp JavaScript runtime: {node_path} ({node_version})", file=sys.stderr, flush=True)
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
